@@ -254,7 +254,7 @@ export async function discoverLMStudioModels(baseUrl: string, _apiKey?: string):
 
 /**
  * Discover models from a SwiftLM server.
- * Uses /health for capabilities (vision) and /v1/models for the model ID.
+ * Reads capabilities from /v1/models (following Ollama convention for capability arrays).
  * @param baseUrl - Base URL of the SwiftLM server (e.g., "http://localhost:5413")
  * @param apiKey - Optional API key
  * @returns Array of discovered models
@@ -269,14 +269,6 @@ export async function discoverSwiftLMModels(baseUrl: string, apiKey?: string): P
 			headers.Authorization = `Bearer ${apiKey}`;
 		}
 
-		// Fetch health info for capabilities (vision, model name)
-		const healthResponse = await fetch(`${baseUrl}/health`, { method: "GET", headers });
-		if (!healthResponse.ok) {
-			throw new Error(`Health check failed: HTTP ${healthResponse.status}: ${healthResponse.statusText}`);
-		}
-		const health = await healthResponse.json();
-
-		// Fetch model list from OpenAI-compatible endpoint
 		const modelsResponse = await fetch(`${baseUrl}/v1/models`, { method: "GET", headers });
 		if (!modelsResponse.ok) {
 			throw new Error(`Models endpoint failed: HTTP ${modelsResponse.status}: ${modelsResponse.statusText}`);
@@ -287,13 +279,11 @@ export async function discoverSwiftLMModels(baseUrl: string, apiKey?: string): P
 			throw new Error("Invalid response format from SwiftLM /v1/models");
 		}
 
-		// SwiftLM reports thinking capability in the config flags
-		const supportsThinking = health.thinking === true;
-
 		return modelsData.data.map((model: any) => {
-			const contextWindow = 8192;
-			const maxTokens = health.max_tokens || 4096;
-			const supportsVision = health.vision === true;
+			// SwiftLM extends /v1/models with a capabilities array (Ollama convention)
+			const capabilities: string[] = model.capabilities || [];
+			const supportsVision = capabilities.includes("vision");
+			const supportsThinking = capabilities.includes("thinking");
 
 			const swiftlmModel: Model<any> = {
 				id: model.id,
@@ -309,8 +299,8 @@ export async function discoverSwiftLMModels(baseUrl: string, apiKey?: string): P
 					cacheRead: 0,
 					cacheWrite: 0,
 				},
-				contextWindow: contextWindow,
-				maxTokens: maxTokens,
+				contextWindow: 8192,
+				maxTokens: 4096,
 				compat: {
 					supportsDeveloperRole: false,
 					supportsReasoningEffort: false,
