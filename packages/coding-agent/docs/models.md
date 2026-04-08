@@ -60,7 +60,7 @@ The `apiKey` is required but Ollama ignores it, so any value works.
 }
 ```
 
-For vision models, add `--vision` when starting SwiftLM and set `"input": ["text", "image"]` on the model. For thinking/reasoning models, add `--thinking` when starting SwiftLM and set `"reasoning": true` with `"thinkingFormat": "qwen"` in the compat field.
+For vision models, add `--vision` when starting SwiftLM and set `"input": ["text", "image"]` on the model. For thinking/reasoning models, add `--thinking` when starting SwiftLM and set `"reasoning": true` with the appropriate `"thinkingFormat"` for your model (e.g., `"qwen"` for Qwen models) in the compat field.
 
 Some OpenAI-compatible servers do not understand the `developer` role used for reasoning-capable models. For those providers, set `compat.supportsDeveloperRole` to `false` so pi sends the system prompt as a `system` message instead. If the server also does not support `reasoning_effort`, set `compat.supportsReasoningEffort` to `false` too.
 
