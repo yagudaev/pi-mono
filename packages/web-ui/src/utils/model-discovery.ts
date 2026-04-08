@@ -253,6 +253,72 @@ export async function discoverLMStudioModels(baseUrl: string, _apiKey?: string):
 }
 
 /**
+ * Discover models from a SwiftLM server.
+ * Uses /health for capabilities (vision) and /v1/models for the model ID.
+ * @param baseUrl - Base URL of the SwiftLM server (e.g., "http://localhost:5413")
+ * @param apiKey - Optional API key
+ * @returns Array of discovered models
+ */
+export async function discoverSwiftLMModels(baseUrl: string, apiKey?: string): Promise<Model<any>[]> {
+	try {
+		const headers: HeadersInit = {
+			"Content-Type": "application/json",
+		};
+
+		if (apiKey) {
+			headers.Authorization = `Bearer ${apiKey}`;
+		}
+
+		// Fetch health info for capabilities (vision, model name)
+		const healthResponse = await fetch(`${baseUrl}/health`, { method: "GET", headers });
+		if (!healthResponse.ok) {
+			throw new Error(`Health check failed: HTTP ${healthResponse.status}: ${healthResponse.statusText}`);
+		}
+		const health = await healthResponse.json();
+
+		// Fetch model list from OpenAI-compatible endpoint
+		const modelsResponse = await fetch(`${baseUrl}/v1/models`, { method: "GET", headers });
+		if (!modelsResponse.ok) {
+			throw new Error(`Models endpoint failed: HTTP ${modelsResponse.status}: ${modelsResponse.statusText}`);
+		}
+		const modelsData = await modelsResponse.json();
+
+		if (!modelsData.data || !Array.isArray(modelsData.data)) {
+			throw new Error("Invalid response format from SwiftLM /v1/models");
+		}
+
+		return modelsData.data.map((model: any) => {
+			const contextWindow = 8192;
+			const maxTokens = health.max_tokens || 4096;
+			const supportsVision = health.vision === true;
+
+			const swiftlmModel: Model<any> = {
+				id: model.id,
+				name: model.id,
+				api: "openai-completions" as any,
+				provider: "", // Will be set by caller
+				baseUrl: `${baseUrl}/v1`,
+				reasoning: false,
+				input: supportsVision ? ["text", "image"] : ["text"],
+				cost: {
+					input: 0,
+					output: 0,
+					cacheRead: 0,
+					cacheWrite: 0,
+				},
+				contextWindow: contextWindow,
+				maxTokens: maxTokens,
+			};
+
+			return swiftlmModel;
+		});
+	} catch (err) {
+		console.error("Failed to discover SwiftLM models:", err);
+		throw new Error(`SwiftLM discovery failed: ${err instanceof Error ? err.message : String(err)}`);
+	}
+}
+
+/**
  * Convenience function to discover models based on provider type.
  * @param type - Provider type
  * @param baseUrl - Base URL of the server
@@ -260,7 +326,7 @@ export async function discoverLMStudioModels(baseUrl: string, _apiKey?: string):
  * @returns Array of discovered models
  */
 export async function discoverModels(
-	type: "ollama" | "llama.cpp" | "vllm" | "lmstudio",
+	type: "ollama" | "llama.cpp" | "vllm" | "lmstudio" | "swiftlm",
 	baseUrl: string,
 	apiKey?: string,
 ): Promise<Model<any>[]> {
@@ -273,5 +339,7 @@ export async function discoverModels(
 			return discoverVLLMModels(baseUrl, apiKey);
 		case "lmstudio":
 			return discoverLMStudioModels(baseUrl, apiKey);
+		case "swiftlm":
+			return discoverSwiftLMModels(baseUrl, apiKey);
 	}
 }

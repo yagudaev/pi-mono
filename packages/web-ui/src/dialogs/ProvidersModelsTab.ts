@@ -39,7 +39,8 @@ export class ProvidersModelsTab extends SettingsTab {
 					provider.type === "ollama" ||
 					provider.type === "llama.cpp" ||
 					provider.type === "vllm" ||
-					provider.type === "lmstudio";
+					provider.type === "lmstudio" ||
+					provider.type === "swiftlm";
 				if (isAutoDiscovery) {
 					this.checkProviderStatus(provider);
 				}
@@ -109,6 +110,7 @@ export class ProvidersModelsTab extends SettingsTab {
 							{ value: "llama.cpp", label: "llama.cpp" },
 							{ value: "vllm", label: "vLLM" },
 							{ value: "lmstudio", label: "LM Studio" },
+							{ value: "swiftlm", label: "SwiftLM" },
 							{ value: "openai-completions", label: i18n("OpenAI Completions Compatible") },
 							{ value: "openai-responses", label: i18n("OpenAI Responses Compatible") },
 							{ value: "anthropic-messages", label: i18n("Anthropic Messages Compatible") },

@@ -129,6 +129,9 @@ export const streamOpenAICompletions: StreamFunction<"openai-completions", OpenA
 			for await (const chunk of openaiStream) {
 				if (!chunk || typeof chunk !== "object") continue;
 
+				// Skip non-standard chunks (e.g., SwiftLM's prefill_progress events)
+				if ("object" in chunk && chunk.object !== "chat.completion.chunk") continue;
+
 				// OpenAI documents ChatCompletionChunk.id as the unique chat completion identifier,
 				// and each chunk in a streamed completion carries the same id.
 				output.responseId ||= chunk.id;
@@ -803,6 +806,8 @@ function detectCompat(model: Model<"openai-completions">): Required<OpenAIComple
 	const provider = model.provider;
 	const baseUrl = model.baseUrl;
 
+	const isSwiftLM = provider === "swiftlm" || baseUrl.includes("localhost:5413");
+
 	const isZai = provider === "zai" || baseUrl.includes("api.z.ai");
 
 	const isNonStandard =
@@ -813,10 +818,11 @@ function detectCompat(model: Model<"openai-completions">): Required<OpenAIComple
 		baseUrl.includes("chutes.ai") ||
 		baseUrl.includes("deepseek.com") ||
 		isZai ||
+		isSwiftLM ||
 		provider === "opencode" ||
 		baseUrl.includes("opencode.ai");
 
-	const useMaxTokens = baseUrl.includes("chutes.ai");
+	const useMaxTokens = baseUrl.includes("chutes.ai") || isSwiftLM;
 
 	const isGrok = provider === "xai" || baseUrl.includes("api.x.ai");
 	const isGroq = provider === "groq" || baseUrl.includes("groq.com");
@@ -834,7 +840,7 @@ function detectCompat(model: Model<"openai-completions">): Required<OpenAIComple
 	return {
 		supportsStore: !isNonStandard,
 		supportsDeveloperRole: !isNonStandard,
-		supportsReasoningEffort: !isGrok && !isZai,
+		supportsReasoningEffort: !isGrok && !isZai && !isSwiftLM,
 		reasoningEffortMap,
 		supportsUsageInStreaming: true,
 		maxTokensField: useMaxTokens ? "max_tokens" : "max_completion_tokens",
@@ -843,13 +849,15 @@ function detectCompat(model: Model<"openai-completions">): Required<OpenAIComple
 		requiresThinkingAsText: false,
 		thinkingFormat: isZai
 			? "zai"
-			: provider === "openrouter" || baseUrl.includes("openrouter.ai")
-				? "openrouter"
-				: "openai",
+			: isSwiftLM
+				? "qwen"
+				: provider === "openrouter" || baseUrl.includes("openrouter.ai")
+					? "openrouter"
+					: "openai",
 		openRouterRouting: {},
 		vercelGatewayRouting: {},
 		zaiToolStream: false,
-		supportsStrictMode: true,
+		supportsStrictMode: !isSwiftLM,
 	};
 }
 

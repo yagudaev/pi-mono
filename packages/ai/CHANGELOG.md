@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added SwiftLM auto-detection in OpenAI completions compat layer (correct `max_tokens` field, thinking format, strict mode)
+- Added filtering for non-standard SSE chunks (e.g., SwiftLM prefill progress events)
+
 ### Fixed
 
 - Fixed bare `readline` import to use `node:readline` prefix for Deno compatibility ([#2885](https://github.com/badlogic/pi-mono/issues/2885) by [@milosv-vtool](https://github.com/milosv-vtool))
