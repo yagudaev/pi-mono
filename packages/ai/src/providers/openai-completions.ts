@@ -806,7 +806,7 @@ function detectCompat(model: Model<"openai-completions">): Required<OpenAIComple
 	const provider = model.provider;
 	const baseUrl = model.baseUrl;
 
-	const isSwiftLM = provider === "swiftlm" || baseUrl.includes("localhost:5413");
+	const isSwiftLM = provider === "swiftlm";
 
 	const isZai = provider === "zai" || baseUrl.includes("api.z.ai");
 

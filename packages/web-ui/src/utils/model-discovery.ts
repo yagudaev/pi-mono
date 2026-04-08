@@ -287,6 +287,9 @@ export async function discoverSwiftLMModels(baseUrl: string, apiKey?: string): P
 			throw new Error("Invalid response format from SwiftLM /v1/models");
 		}
 
+		// SwiftLM reports thinking capability in the config flags
+		const supportsThinking = health.thinking === true;
+
 		return modelsData.data.map((model: any) => {
 			const contextWindow = 8192;
 			const maxTokens = health.max_tokens || 4096;
@@ -298,7 +301,7 @@ export async function discoverSwiftLMModels(baseUrl: string, apiKey?: string): P
 				api: "openai-completions" as any,
 				provider: "", // Will be set by caller
 				baseUrl: `${baseUrl}/v1`,
-				reasoning: false,
+				reasoning: supportsThinking,
 				input: supportsVision ? ["text", "image"] : ["text"],
 				cost: {
 					input: 0,
@@ -308,6 +311,14 @@ export async function discoverSwiftLMModels(baseUrl: string, apiKey?: string): P
 				},
 				contextWindow: contextWindow,
 				maxTokens: maxTokens,
+				compat: {
+					supportsDeveloperRole: false,
+					supportsReasoningEffort: false,
+					supportsStore: false,
+					supportsStrictMode: false,
+					maxTokensField: "max_tokens",
+					thinkingFormat: "qwen",
+				},
 			};
 
 			return swiftlmModel;

@@ -92,7 +92,7 @@ export class ProvidersModelsTab extends SettingsTab {
 
 	private renderCustomProviders(): TemplateResult {
 		const isAutoDiscovery = (type: string) =>
-			type === "ollama" || type === "llama.cpp" || type === "vllm" || type === "lmstudio";
+			type === "ollama" || type === "llama.cpp" || type === "vllm" || type === "lmstudio" || type === "swiftlm";
 
 		return html`
 			<div class="flex flex-col gap-6">
