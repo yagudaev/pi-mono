@@ -129,8 +129,8 @@ export const streamOpenAICompletions: StreamFunction<"openai-completions", OpenA
 			for await (const chunk of openaiStream) {
 				if (!chunk || typeof chunk !== "object") continue;
 
-				// Skip non-standard chunks (e.g., SwiftLM's prefill_progress events)
-				if ("object" in chunk && chunk.object !== "chat.completion.chunk") continue;
+				// Skip SwiftLM's non-standard prefill_progress SSE events
+				if ("object" in chunk && (chunk as { object: string }).object === "prefill_progress") continue;
 
 				// OpenAI documents ChatCompletionChunk.id as the unique chat completion identifier,
 				// and each chunk in a streamed completion carries the same id.
