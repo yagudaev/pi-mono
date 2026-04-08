@@ -299,8 +299,8 @@ export async function discoverSwiftLMModels(baseUrl: string, apiKey?: string): P
 					cacheRead: 0,
 					cacheWrite: 0,
 				},
-				contextWindow: model.context_length || 8192,
-				maxTokens: model.context_length || 8192,
+				contextWindow: model.context_length || 32768,
+				maxTokens: model.context_length || 32768,
 				compat: {
 					maxTokensField: "max_tokens",
 				},
