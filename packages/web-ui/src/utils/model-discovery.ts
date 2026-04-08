@@ -307,7 +307,6 @@ export async function discoverSwiftLMModels(baseUrl: string, apiKey?: string): P
 					supportsStore: false,
 					supportsStrictMode: false,
 					maxTokensField: "max_tokens",
-					thinkingFormat: "qwen",
 				},
 			};
 
