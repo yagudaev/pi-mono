@@ -302,10 +302,6 @@ export async function discoverSwiftLMModels(baseUrl: string, apiKey?: string): P
 				contextWindow: 8192,
 				maxTokens: 4096,
 				compat: {
-					supportsDeveloperRole: false,
-					supportsReasoningEffort: false,
-					supportsStore: false,
-					supportsStrictMode: false,
 					maxTokensField: "max_tokens",
 				},
 			};

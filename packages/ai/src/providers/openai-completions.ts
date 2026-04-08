@@ -840,7 +840,7 @@ function detectCompat(model: Model<"openai-completions">): Required<OpenAIComple
 	return {
 		supportsStore: !isNonStandard,
 		supportsDeveloperRole: !isNonStandard,
-		supportsReasoningEffort: !isGrok && !isZai && !isSwiftLM,
+		supportsReasoningEffort: !isGrok && !isZai,
 		reasoningEffortMap,
 		supportsUsageInStreaming: true,
 		maxTokensField: useMaxTokens ? "max_tokens" : "max_completion_tokens",
@@ -855,7 +855,7 @@ function detectCompat(model: Model<"openai-completions">): Required<OpenAIComple
 		openRouterRouting: {},
 		vercelGatewayRouting: {},
 		zaiToolStream: false,
-		supportsStrictMode: !isSwiftLM,
+		supportsStrictMode: true,
 	};
 }
 
