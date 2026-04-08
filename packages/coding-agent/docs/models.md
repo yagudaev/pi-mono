@@ -1,6 +1,6 @@
 # Custom Models
 
-Add custom providers and models (Ollama, vLLM, LM Studio, proxies) via `~/.pi/agent/models.json`.
+Add custom providers and models (Ollama, vLLM, LM Studio, SwiftLM, proxies) via `~/.pi/agent/models.json`.
 
 ## Table of Contents
 
@@ -15,7 +15,7 @@ Add custom providers and models (Ollama, vLLM, LM Studio, proxies) via `~/.pi/ag
 
 ## Minimal Example
 
-For local models (Ollama, LM Studio, vLLM), only `id` is required per model:
+For local models (Ollama, LM Studio, vLLM, SwiftLM), only `id` is required per model:
 
 ```json
 {
@@ -34,6 +34,33 @@ For local models (Ollama, LM Studio, vLLM), only `id` is required per model:
 ```
 
 The `apiKey` is required but Ollama ignores it, so any value works.
+
+### SwiftLM
+
+[SwiftLM](https://github.com/AegisAI-Co/SwiftLM) is a native Apple Silicon inference server for MLX models. Start SwiftLM, then configure:
+
+```json
+{
+  "providers": {
+    "swiftlm": {
+      "baseUrl": "http://localhost:5413/v1",
+      "api": "openai-completions",
+      "apiKey": "swiftlm",
+      "compat": {
+        "supportsDeveloperRole": false,
+        "supportsReasoningEffort": false,
+        "maxTokensField": "max_tokens",
+        "supportsStrictMode": false
+      },
+      "models": [
+        { "id": "mlx-community/Qwen3.5-35B-A3B-4bit" }
+      ]
+    }
+  }
+}
+```
+
+For vision models, add `--vision` when starting SwiftLM and set `"input": ["text", "image"]` on the model. For thinking/reasoning models, add `--thinking` when starting SwiftLM and set `"reasoning": true` with the appropriate `"thinkingFormat"` for your model (e.g., `"qwen"` for Qwen models) in the compat field.
 
 Some OpenAI-compatible servers do not understand the `developer` role used for reasoning-capable models. For those providers, set `compat.supportsDeveloperRole` to `false` so pi sends the system prompt as a `system` message instead. If the server also does not support `reasoning_effort`, set `compat.supportsReasoningEffort` to `false` too.
 

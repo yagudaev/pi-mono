@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added SwiftLM as a first-party local model provider with auto-discovery support
+
 ## [0.65.2] - 2026-04-06
 
 ## [0.65.1] - 2026-04-05
